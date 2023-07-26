@@ -34,8 +34,12 @@ export default function Home() {
       }
 
       const data = await response.json();
+      // Inserting the city field in the response data
+      ((obj, key, value) => {
+        obj[key] = value;
+        customOrder.unshift(key);
+      })(data, city, search)
       setWeatherInfo({
-        city: search,
         ...data,
       });
     } catch (error) {
