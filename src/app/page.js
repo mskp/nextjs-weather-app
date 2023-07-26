@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 
 export default function Home() {
-  const [search, setSearch] = useState("Vrindavan");
+  const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [weatherInfo, setWeatherInfo] = useState({
     city: "",
