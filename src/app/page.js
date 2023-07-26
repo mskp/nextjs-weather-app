@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { useState, useEffect } from "react";
 
@@ -7,33 +7,13 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [weatherInfo, setWeatherInfo] = useState({
     city: "",
-    temp: "",
-    humidity: "",
   });
 
   useEffect(() => {
     if (search) {
       fetchWeather();
     }
-    else {
-      setWeatherInfo({
-        city: "",
-        temp: "",
-        humidity: "",
-      });
-    }
-  }, [search]);
-
-
-
-  const handleOnChange = (event) => {
-    setSearch(event.target.value);
-    setWeatherInfo({
-      city: "",
-      temp: "",
-      humidity: "",
-    });
-  };
+  }, []);
 
   const fetchWeather = async () => {
     if (!search) return;
@@ -50,30 +30,34 @@ export default function Home() {
       );
 
       if (!response.ok) {
-        // Handle HTTP errors gracefully
         throw new Error("Network response was not OK");
       }
-  
+
       const data = await response.json();
-      const tempInCelsius = data?.temp;
-      const isValidTemp = !isNaN(tempInCelsius) && tempInCelsius !== null;
-  
       setWeatherInfo({
         city: search,
-        temp: isValidTemp ? `${tempInCelsius}°C` : "", // Set to an empty string if temperature is not valid
-        humidity: data?.humidity,
+        ...data,
       });
     } catch (error) {
+      console.error(error);
       setWeatherInfo({
         city: "",
-        temp: "",
-        humidity: "",
       });
     } finally {
       setIsLoading(false);
     }
   };
-  
+
+  const formatKey = (key) => {
+    return key.replace(/_/g, " ").replace(/\w\S*/g, (txt) => {
+      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    fetchWeather();
+  };
 
   return (
     <main className="flex items-center justify-center min-h-screen bg-gradient-to-r from-indigo-500 from-10% via-sky-500 via-30% to-emerald-500 to-90%">
@@ -83,30 +67,38 @@ export default function Home() {
             Weather<span className="text-purple-600">Up</span>
           </h5>
         </div>
-        <div className="mt-4">
-          <input
-            onChange={handleOnChange}
-            type="search"
-            value={search}
-            className="w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="Search for city"
-            aria-label="Search"
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="mt-4">
+            <input
+              onChange={(e) => setSearch(e.target.value)}
+              value={search}
+              type="search"
+              className="w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Search for city"
+              aria-label="Search"
+            />
+          </div>
+          <button
+            type="submit"
+            className="mt-3 w-full py-2 px-4 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <span>🔍</span>
+          </button>
+        </form>
 
         <ul className="mt-4 space-y-2 text-white">
-          <li>
-            <span className="font-bold">Temperature: </span>
-            {(isLoading && !weatherInfo.temp) ? "Loading..." : weatherInfo.temp}
-          </li>
-          <li>
-            <span className="font-bold">Humidity: </span>
-            {(isLoading && !weatherInfo.humidity) ? "Loading..." : weatherInfo.humidity}
-          </li>
+          {isLoading ? (
+            <li>Loading...</li>
+          ) : (
+            Object.entries(weatherInfo).map(([key, value]) => (
+              <li key={key}>
+                <span className="font-bold">{formatKey(key)}: </span>
+                {typeof value === "number" ? value + (key.includes("temp") ? "°C" : "") : value}
+              </li>
+            ))
+          )}
         </ul>
-
       </div>
-
     </main>
   );
 }
