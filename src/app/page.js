@@ -5,9 +5,7 @@ import { useState, useEffect } from "react";
 export default function Home() {
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [weatherInfo, setWeatherInfo] = useState({
-    city: "",
-  });
+  const [weatherInfo, setWeatherInfo] = useState({});
 
   useEffect(() => {
     if (search) {
@@ -34,12 +32,8 @@ export default function Home() {
       }
 
       const data = await response.json();
-      // Inserting the city field in the response data
-      ((obj, key, value) => {
-        obj[key] = value;
-        customOrder.unshift(key);
-      })(data, city, search)
       setWeatherInfo({
+        city: search,
         ...data,
       });
     } catch (error) {
