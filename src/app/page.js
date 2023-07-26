@@ -4,15 +4,27 @@ import { useState, useEffect } from "react";
 
 export default function Home() {
   const [search, setSearch] = useState("Delhi");
-  useEffect(() => {
-    fetchWeather();
-  }, []);
-
+  const [isLoading, setIsLoading] = useState(false);
   const [weatherInfo, setWeatherInfo] = useState({
     city: "",
     temp: "",
     humidity: "",
   });
+
+  useEffect(() => {
+    if (search) {
+      fetchWeather();
+    }
+    else {
+      setWeatherInfo({
+        city: "",
+        temp: "",
+        humidity: "",
+      });
+    }
+  }, [search]);
+
+
 
   const handleOnChange = (event) => {
     setSearch(event.target.value);
@@ -24,7 +36,9 @@ export default function Home() {
   };
 
   const fetchWeather = async () => {
+    if (!search) return;
     try {
+      setIsLoading(true);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}?city=${search}`,
         {
@@ -34,23 +48,36 @@ export default function Home() {
           },
         }
       );
+
       if (!response.ok) {
+        // Handle HTTP errors gracefully
         throw new Error("Network response was not OK");
       }
+  
       const data = await response.json();
+      const tempInCelsius = data?.temp;
+      const isValidTemp = !isNaN(tempInCelsius) && tempInCelsius !== null;
+  
       setWeatherInfo({
         city: search,
-        temp: data?.temp,
+        temp: isValidTemp ? `${tempInCelsius}°C` : "", // Set to an empty string if temperature is not valid
         humidity: data?.humidity,
       });
     } catch (error) {
-      console.error("Error:", error);
+      setWeatherInfo({
+        city: "",
+        temp: "",
+        humidity: "",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
+  
 
   return (
     <main className="flex items-center justify-center min-h-screen bg-gradient-to-r from-indigo-500 from-10% via-sky-500 via-30% to-emerald-500 to-90%">
-      <div className="w-full max-w-sm p-4 bg-white rounded-lg shadow">
+      <div className="w-full max-w-sm p-4 bg-gray-700 rounded-lg shadow">
         <div className="text-center">
           <h5 className="text-2xl font-bold text-red-600">
             Weather<span className="text-purple-600">Up</span>
@@ -66,25 +93,20 @@ export default function Home() {
             aria-label="Search"
           />
         </div>
-        <button
-          className="mt-2 w-full py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-          onClick={fetchWeather}
-        >
-          <span>🔍</span>
-        </button>
-        <ul className="mt-4 space-y-2">
-          <li className="text-gray-600">
-            <span className="font-bold">City:</span> {search}
+
+        <ul className="mt-4 space-y-2 text-white">
+          <li>
+            <span className="font-bold">Temperature: </span>
+            {(isLoading && !weatherInfo.temp) ? "Loading..." : weatherInfo.temp}
           </li>
-          <li className="text-gray-600">
-            <span className="font-bold">Temperature:</span>
-            {weatherInfo.temp ? weatherInfo.temp + "°C" : ""}
-          </li>
-          <li className="text-gray-600">
-            <span className="font-bold">Humidity:</span> {weatherInfo.humidity}
+          <li>
+            <span className="font-bold">Humidity: </span>
+            {(isLoading && !weatherInfo.humidity) ? "Loading..." : weatherInfo.humidity}
           </li>
         </ul>
+
       </div>
+
     </main>
   );
 }

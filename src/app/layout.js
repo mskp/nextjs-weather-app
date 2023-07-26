@@ -5,6 +5,7 @@ const robo_mono = Roboto_Mono({ subsets: ["latin"] });
 
 export const metadata = {
   title: "WeatherUp",
+  manifest: "/manifest.webmanifest"
 };
 
 export default function RootLayout({ children }) {
