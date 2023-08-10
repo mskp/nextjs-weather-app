@@ -1,19 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react";
+import { FaSearch } from "react-icons/fa";
 
 export default function Home() {
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [weatherInfo, setWeatherInfo] = useState({});
+  const keys = ["Cloud Percentage", "Temperature in celsius", "Feels Like", "Humidity", "Min. Temperature", "Max. Temperature", "Wind Speed", "Wind Degrees", "Sunrise", "Sunrise"
+  ]
 
-  useEffect(() => {
-    if (search) {
-      fetchWeather();
-    }
-  }, []);
-
-  const fetchWeather = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (!search) return;
     try {
       setIsLoading(true);
@@ -32,69 +30,50 @@ export default function Home() {
       }
 
       const data = await response.json();
-      setWeatherInfo({
-        city: search,
-        ...data,
-      });
+      console.log(data)
+      setWeatherInfo(data);
     } catch (error) {
       console.error(error);
-      setWeatherInfo({
-        city: "",
-      });
+      setWeatherInfo({});
     } finally {
       setIsLoading(false);
     }
   };
 
-  const formatKey = (key) => {
-    return key.replace(/_/g, " ").replace(/\w\S*/g, (txt) => {
-      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    fetchWeather();
-  };
-
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gradient-to-r from-indigo-500 from-10% via-sky-500 via-30% to-emerald-500 to-90%">
-      <div className="w-full max-w-sm p-4 bg-gray-700 rounded-lg shadow">
-        <div className="text-center">
-          <h5 className="text-2xl font-bold text-red-600">
-            Weather<span className="text-purple-600">Up</span>
-          </h5>
-        </div>
+    <main className="flex justify-center">
+      <div className="w-full max-w-sm p-4 border rounded-lg">
         <form onSubmit={handleSubmit}>
           <div className="mt-4">
             <input
               onChange={(e) => setSearch(e.target.value)}
               value={search}
               type="search"
-              className="w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full py-4 px-4 border text-lg bg-black text-white rounded-md shadow-sm outline-none focus:border-red-400"
               placeholder="Search for city"
-              aria-label="Search"
             />
           </div>
           <button
             type="submit"
-            className="mt-3 w-full py-2 px-4 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            disabled={isLoading}
+            className="mt-3 w-full py-2 px-4 bg-emerald-700 text-white rounded-2xl hover:bg-emerald-800 outline-none"
           >
-            <span>🔍</span>
+            {isLoading ? "Searching..." : "Search"}
           </button>
         </form>
 
-        <ul className="mt-4 space-y-2 text-white">
-          {isLoading ? (
-            <li>Loading...</li>
-          ) : (
-            Object.entries(weatherInfo).map(([key, value]) => (
-              <li key={key}>
-                <span className="font-bold">{formatKey(key)}: </span>
-                {typeof value === "number" ? value + (key.includes("temp") ? "°C" : "") : value}
-              </li>
-            ))
-          )}
+        <ul className="mt-4 space-y-2 text-white flex flex-col">
+          {/* {weatherInfo} */}
+          {keys.map((key, index) => (
+            // <div className="">
+            <li key={index} className="text-center flex flex-col">
+              <div className="flex-flex-col mb-4">
+                <p className="font-bold mb-2">{key}</p>
+                <p className="capitalize">{(isLoading || !Object.values(weatherInfo)[index]) ? "_ _ _" : Object.values(weatherInfo)[index]}</p>
+              </div>
+            </li>
+            // </div>
+          ))}
         </ul>
       </div>
     </main>
