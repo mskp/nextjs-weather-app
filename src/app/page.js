@@ -42,7 +42,7 @@ export default function Home() {
 
   return (
     <main className="flex justify-center">
-      <div className="w-full max-w-sm p-4 border rounded-lg">
+      <div className="w-full max-w-sm p-4 lg:border rounded-lg">
         <form onSubmit={handleSubmit}>
           <div className="mt-4">
             <input
