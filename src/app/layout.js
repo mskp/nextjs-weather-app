@@ -12,7 +12,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={robo_mono.className}>
+      <body className={`${robo_mono.className} bg-zinc-900`}>
         <Header />
         {children}
       </body>
